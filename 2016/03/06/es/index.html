@@ -1,0 +1,512 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh_CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>Elasticsearch | White&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="White">
+    
+
+    
+    <meta name="description" content="Installation123456#jdk 7 requiredcurl -L -O https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/tar/elasticsearch/2.2.0/elasticsearch-2.2.0.tar.gztar -xvf elasticsearch-2.">
+<meta name="keywords" content="elasticsearch">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Elasticsearch">
+<meta property="og:url" content="http://lazywhite.github.io/2016/03/06/es/index.html">
+<meta property="og:site_name" content="White&#39;s Blog">
+<meta property="og:description" content="Installation123456#jdk 7 requiredcurl -L -O https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/tar/elasticsearch/2.2.0/elasticsearch-2.2.0.tar.gztar -xvf elasticsearch-2.">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:updated_time" content="2016-09-05T08:45:57.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Elasticsearch">
+<meta name="twitter:description" content="Installation123456#jdk 7 requiredcurl -L -O https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/tar/elasticsearch/2.2.0/elasticsearch-2.2.0.tar.gztar -xvf elasticsearch-2.">
+
+    
+    <link rel="alternative" href="/atom.xml" title="White&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="White&#39;s Blog">White&#39;s Blog</a></h1>
+				<h2 class="blog-motto">生也有涯 而学也无涯</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜單">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li>
+ 					
+						<form class="search" action="" target="_blank">
+							<label>Search</label>
+						<input name="s" type="hidden" value=  ><input type="text" name="q" size="30" placeholder="搜索"><br>
+						</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/03/06/es/" title="Elasticsearch" itemprop="url">Elasticsearch</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="White" target="_blank" itemprop="author">White</a>
+		
+  <p class="article-time">
+    <time datetime="2016-03-05T16:19:03.000Z" itemprop="datePublished"> 發表於 Mar 6 2016</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目錄</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Installation"><span class="toc-number">1.</span> <span class="toc-text">Installation</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Rest-API"><span class="toc-number">2.</span> <span class="toc-text">Rest API</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Main-Usage"><span class="toc-number">2.1.</span> <span class="toc-text">Main Usage</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#API-example"><span class="toc-number">2.2.</span> <span class="toc-text">API example</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Python-client"><span class="toc-number">3.</span> <span class="toc-text">Python client</span></a></li></ol>
+		
+		</div>
+		
+		<h2 id="Installation"><a href="#Installation" class="headerlink" title="Installation"></a>Installation</h2><figure class="highlight crystal"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#jdk 7 required</span></div><div class="line">curl -L -O <span class="symbol">https:</span>/<span class="regexp">/download.elastic.co/elasticsearch</span><span class="regexp">/release/org</span><span class="regexp">/elasticsearch/distribution</span><span class="regexp">/tar/elasticsearch</span><span class="regexp">/2.2.0/elasticsearch</span>-<span class="number">2.2</span>.<span class="number">0</span>.tar.gz</div><div class="line">tar -xvf elasticsearch-<span class="number">2.2</span>.<span class="number">0</span>.tar.gz</div><div class="line">cd elasticsearch-<span class="number">2.2</span>.<span class="number">0</span>/bin</div><div class="line">./elasticsearch --cluster.name my_cluster_name --node.name my_node_name</div><div class="line"><span class="comment"># port 9200 is used for rest api</span></div></pre></td></tr></table></figure>
+<a id="more"></a>
+<h2 id="Rest-API"><a href="#Rest-API" class="headerlink" title="Rest API"></a>Rest API</h2><h3 id="Main-Usage"><a href="#Main-Usage" class="headerlink" title="Main Usage"></a>Main Usage</h3><ol>
+<li>check cluster, node, index health and status</li>
+<li>admin cluster, node, index</li>
+<li>perform CRUD and serach on index</li>
+<li>advanced search operation like paging sorting filtering scripting aggregation</li>
+</ol>
+<h3 id="API-example"><a href="#API-example" class="headerlink" title="API example"></a>API example</h3><figure class="highlight crmsh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#curl 'localhost:9200/_cat/health?v'</span></div><div class="line">epoch      timestamp cluster       status <span class="keyword">node</span>.<span class="title">total</span> <span class="keyword">node</span>.<span class="title">data</span> shards pri relo init unassign</div><div class="line"><span class="number">1394735289</span> <span class="number">14</span>:<span class="number">28</span>:<span class="number">09</span>  elasticsearch green           <span class="number">1</span>         <span class="number">1</span>      <span class="number">0</span>   <span class="number">0</span>    <span class="number">0</span>    <span class="number">0</span>        <span class="number">0</span></div><div class="line"></div><div class="line"><span class="comment">#curl 'localhost:9200/_cat/nodes?v'</span></div><div class="line">host         ip        heap.percent ram.percent load <span class="keyword">node</span>.<span class="title">role</span> <span class="keyword">master</span> <span class="title">name</span></div><div class="line">mwubuntu1    <span class="number">127.0</span>.<span class="number">1.1</span>            <span class="number">8</span>           <span class="number">4</span> <span class="number">0.00</span> d         *      New Goblin</div><div class="line"></div><div class="line"><span class="comment">#curl 'localhost:9200/_cat/indices?v'</span></div><div class="line">health index pri rep docs.count docs.deleted store.size pri.store.size</div><div class="line"></div><div class="line"><span class="comment"># create an index</span></div><div class="line">curl -XPUT 'localhost:<span class="number">9200</span>/customer?pretty'</div><div class="line">curl 'localhost:<span class="number">9200</span>/_cat/indices?v'</div><div class="line"></div><div class="line"></div><div class="line"><span class="comment"># create an document</span></div><div class="line">curl -XPUT 'localhost:<span class="number">9200</span>/customer/external/<span class="number">1</span>?pretty' -d '</div><div class="line">&#123;</div><div class="line">  <span class="string">"name"</span>: <span class="string">"John Doe"</span></div><div class="line">&#125;'</div><div class="line"></div><div class="line"><span class="comment"># query or index an document</span></div><div class="line">curl -XGET 'localhost:<span class="number">9200</span>/customer/external/<span class="number">1</span>?pretty'</div><div class="line">&#123;</div><div class="line">  <span class="string">"_index"</span> : <span class="string">"customer"</span>,</div><div class="line">  <span class="string">"_type"</span> : <span class="string">"external"</span>,</div><div class="line">  <span class="string">"_id"</span> : <span class="string">"1"</span>,</div><div class="line">  <span class="string">"_version"</span> : <span class="number">1</span>,</div><div class="line">  <span class="string">"found"</span> : <span class="literal">true</span>,</div><div class="line">  <span class="string">"_source"</span> : &#123;</div><div class="line">    <span class="string">"name"</span> : <span class="string">"john Doe"</span></div><div class="line">  &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment"># replace an document</span></div><div class="line">curl -XPUT 'localhost:<span class="number">9200</span>/customer/external/<span class="number">1</span>?pretty' -d '</div><div class="line">&#123;</div><div class="line">  <span class="string">"name"</span>: <span class="string">"Weild Linkin"</span></div><div class="line">&#125;'</div><div class="line"></div><div class="line"></div><div class="line"><span class="comment"># When indexing, the ID part is optional. If not specified, Elasticsearch will generate a random ID</span></div><div class="line"><span class="comment"># we are using the POST verb instead of PUT since we didn’t specify an ID.</span></div><div class="line">curl -XPOST 'localhost:<span class="number">9200</span>/customer/external?pretty' -d '</div><div class="line">&#123;</div><div class="line">  <span class="string">"name"</span>: <span class="string">"Jane Doe"</span></div><div class="line">&#125;'</div><div class="line"></div><div class="line"><span class="comment"># update an document</span></div><div class="line"><span class="comment"># ES does not do in-place update, it just delete old one and place a new one</span></div><div class="line">curl -XPOST 'localhost:<span class="number">9200</span>/customer/external/<span class="number">1</span>/_update?pretty' -d '</div><div class="line">&#123;</div><div class="line">  <span class="string">"doc"</span>: &#123; <span class="string">"name"</span>: <span class="string">"Jane Doe"</span> &#125;</div><div class="line">&#125;'</div><div class="line"></div><div class="line"><span class="comment"># update and add new field to document</span></div><div class="line">curl -XPOST 'localhost:<span class="number">9200</span>/customer/external/<span class="number">1</span>/_update?pretty' -d '</div><div class="line">&#123;</div><div class="line">  <span class="string">"doc"</span>: &#123; <span class="string">"name"</span>: <span class="string">"Jane Doe"</span>, <span class="string">"age"</span>: <span class="number">20</span> &#125;</div><div class="line">&#125;'</div><div class="line"></div><div class="line"><span class="comment"># using "script" to update an document</span></div><div class="line">curl -XPOST 'localhost:<span class="number">9200</span>/customer/external/<span class="number">1</span>/_update?pretty' -d '</div><div class="line">&#123;</div><div class="line">  <span class="string">"script"</span> : <span class="string">"ctx._source.age += 5"</span></div><div class="line">&#125;'</div><div class="line"></div><div class="line"><span class="comment"># delete an document</span></div><div class="line">curl -XDELETE 'localhost:<span class="number">9200</span>/customer/external/<span class="number">2</span>?pretty'</div><div class="line"></div><div class="line"><span class="comment"># batch processing</span></div><div class="line"><span class="comment"># perform CRUD operaton in batches using _bulk api</span></div><div class="line">The bulk API executes all the actions sequentially <span class="keyword">and</span> <span class="keyword">in</span> order. If a single action fails for whatever reason, it will continue to process the remainder of the actions after it</div><div class="line">curl -XPOST 'localhost:<span class="number">9200</span>/customer/external/_bulk?pretty' -d '</div><div class="line">&#123;<span class="string">"index"</span>:&#123;<span class="string">"_id"</span>:<span class="string">"1"</span>&#125;&#125;</div><div class="line">&#123;<span class="string">"name"</span>: <span class="string">"John Doe"</span> &#125;</div><div class="line">&#123;<span class="string">"index"</span>:&#123;<span class="string">"_id"</span>:<span class="string">"2"</span>&#125;&#125;</div><div class="line">&#123;<span class="string">"name"</span>: <span class="string">"Jane Doe"</span> &#125;</div><div class="line">'</div><div class="line"></div><div class="line"><span class="comment"># create an index with shard and replica settings</span></div><div class="line">$ curl -XPUT 'localhost:<span class="number">9200</span>/customer' -d '</div><div class="line">&#123;</div><div class="line">    <span class="string">"settings"</span>:&#123;</div><div class="line">        <span class="string">"index"</span>:&#123;</div><div class="line">        <span class="string">"number_of_shards"</span>: <span class="number">1</span>,</div><div class="line">        <span class="string">"number_of_replicas"</span>: <span class="number">0</span></div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;'</div></pre></td></tr></table></figure>
+<h2 id="Python-client"><a href="#Python-client" class="headerlink" title="Python client"></a>Python client</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">from</span> elasticsearch <span class="keyword">import</span> Elasticsearch</div><div class="line"><span class="keyword">from</span> datetime <span class="keyword">import</span> datetime</div><div class="line"></div><div class="line">es = Elasticsearch()</div><div class="line"></div><div class="line"><span class="keyword">print</span> dir(es)</div><div class="line">es.index(index=<span class="string">'customer'</span>, doc_type=<span class="string">'external'</span>, id=<span class="number">3</span>, body=&#123;<span class="string">"name"</span>:<span class="string">"yellow star"</span>&#125;)</div><div class="line"><span class="keyword">print</span> es.get(index=<span class="string">'customer'</span>, doc_type=<span class="string">'external'</span>, id=<span class="number">3</span>)[<span class="string">'_source'</span>]</div></pre></td></tr></table></figure>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/tech/">tech</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/elasticsearch/">elasticsearch</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://lazywhite.github.io/2016/03/06/es/" data-title="Elasticsearch | White&#39;s Blog" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2016/03/06/bind/" title="Bind DNS">
+  <strong>上一篇：</strong><br/>
+  <span>
+  Bind DNS</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2014/11/13/githug/"  title="Githug">
+ <strong>下一篇：</strong><br/> 
+ <span>Githug
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="顯示側邊欄"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目錄</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Installation"><span class="toc-number">1.</span> <span class="toc-text">Installation</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Rest-API"><span class="toc-number">2.</span> <span class="toc-text">Rest API</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Main-Usage"><span class="toc-number">2.1.</span> <span class="toc-text">Main Usage</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#API-example"><span class="toc-number">2.2.</span> <span class="toc-text">API example</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Python-client"><span class="toc-number">3.</span> <span class="toc-text">Python client</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隱藏側邊欄"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="lazywhite" data-width="220" data-height="119" data-theme="medium">
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
+</div>
+  </div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分類</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/tech/" title="tech">tech<sup>16</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">標簽</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/linux/" title="linux">linux<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/kvm/" title="kvm">kvm<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/kafka/" title="kafka">kafka<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bind/" title="bind">bind<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/vmware/" title="vmware">vmware<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/elasticsearch/" title="elasticsearch">elasticsearch<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/galera/" title="galera">galera<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/openvswitch/" title="openvswitch">openvswitch<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/solaris/" title="solaris">solaris<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongodb/" title="mongodb">mongodb<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/NFV/" title="NFV">NFV<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HA/" title="HA">HA<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iscsi/" title="iscsi">iscsi<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zfs/" title="zfs">zfs<sup>1</sup></a></li>
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+		</ul>
+</div>
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 訂閱</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/lazywhite" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<a href="mailto:346816483@qq.com" target="_blank" class="icon-email" title="Email Me"></a>
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2017 
+		
+		<a href="/about" target="_blank" title="White">White</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回頂部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>

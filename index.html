@@ -1,0 +1,952 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh_CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>White&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="White">
+    
+
+    
+    <meta property="og:type" content="website">
+<meta property="og:title" content="White&#39;s Blog">
+<meta property="og:url" content="http://lazywhite.github.io/index.html">
+<meta property="og:site_name" content="White&#39;s Blog">
+<meta property="og:locale" content="zh_CN">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="White&#39;s Blog">
+
+    
+    <link rel="alternative" href="/atom.xml" title="White&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="White&#39;s Blog">White&#39;s Blog</a></h1>
+				<h2 class="blog-motto">生也有涯 而学也无涯</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜單">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li>
+ 					
+						<form class="search" action="" target="_blank">
+							<label>Search</label>
+						<input name="s" type="hidden" value=  ><input type="text" name="q" size="30" placeholder="搜索"><br>
+						</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main">
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/06/08/mongodb-cluster-upgrade/" title="Mongodb-Cluster-Upgrade" itemprop="url">Mongodb-Cluster-Upgrade</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="White" target="_blank" itemprop="author">White</a>
+		
+  <p class="article-time">
+    <time datetime="2016-06-08T08:21:58.000Z" itemprop="datePublished"> 發表於 Jun 8 2016</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <h2 id="Mongodb集群版本升级"><a href="#Mongodb集群版本升级" class="headerlink" title="Mongodb集群版本升级"></a>Mongodb集群版本升级</h2><p><a href="https://docs.mongodb.com/manual/tutorial/upgrade-revision/" target="_blank" rel="external">参考文档</a>  </p>
+<h2 id="一-前提"><a href="#一-前提" class="headerlink" title="一. 前提"></a>一. 前提</h2><ol>
+<li>最新的数据库备份</li>
+<li>应用程序需具有兼容mongodb-3.2.7的最新driver: java-mongodb-3.2  <a href="https://docs.mongodb.com/ecosystem/drivers/driver-compatibility-reference/" target="_blank" rel="external">driver requirement</a>  </li>
+<li>包含replSet的升级 需要在维护窗口期内完成(replSet停止master需重新选举, 不接受write)</li>
+</ol>
+<h2 id="二-Topic"><a href="#二-Topic" class="headerlink" title="二. Topic"></a>二. Topic</h2><h3 id="1-upgrade-a-binary"><a href="#1-upgrade-a-binary" class="headerlink" title="1. upgrade a binary"></a>1. upgrade a binary</h3><figure class="highlight routeros"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">binary </div><div class="line">	shutdown instance</div><div class="line">		db.shutdownServer()</div><div class="line">	replace binary</div><div class="line">	start instance</div></pre></td></tr></table></figure>
+<h3 id="2-upgrade-a-replSet"><a href="#2-upgrade-a-replSet" class="headerlink" title="2. upgrade a replSet"></a>2. upgrade a replSet</h3><figure class="highlight routeros"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">replSet</div><div class="line"><span class="built_in">	upgrade </span>secondaries</div><div class="line">	<span class="built_in">	upgrade </span>one secondary</div><div class="line">			wait <span class="keyword">for</span> the secondary recover <span class="keyword">to</span> SECONDARY state </div><div class="line"><span class="built_in">	upgrade </span>primary</div><div class="line">			rs.stepDown()  (election takes 10-20s)</div></pre></td></tr></table></figure>
+<h3 id="3-backup-by-lvm-snapshot"><a href="#3-backup-by-lvm-snapshot" class="headerlink" title="3. backup by lvm snapshot"></a>3. backup by lvm snapshot</h3><p>Take snapshot    </p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">lvcreate -L500M -s -n dbbakcup <span class="regexp">/dev/m</span>ongovg<span class="regexp">/lvm1</span></div></pre></td></tr></table></figure>
+<p>Mount snapshot and take backup </p>
+<figure class="highlight groovy"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">mkdir <span class="regexp">/mnt/</span>mongovg/dbbakcup</div><div class="line">mount <span class="regexp">/dev/</span>mongovg<span class="regexp">/lvm1 /</span>mnt<span class="regexp">/mongovg/</span>lvm1</div><div class="line">tar -cf <span class="regexp">/dir/</span>to<span class="regexp">/backup /</span>mnt<span class="regexp">/mongovg/</span>lvm1</div></pre></td></tr></table></figure>
+<p>Remove the snapshot<br><figure class="highlight dts"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">umount <span class="meta-keyword">/mnt/</span>mongovg/lvm1</div><div class="line">lvremove <span class="meta-keyword">/dev/</span>mongovg/lvm1</div></pre></td></tr></table></figure></p>
+<h2 id="三-分片集群升级流程"><a href="#三-分片集群升级流程" class="headerlink" title="三. 分片集群升级流程"></a>三. 分片集群升级流程</h2><figure class="highlight routeros"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="builtin-name">disable</span> cluster balancer</div><div class="line">	sh.stopBalancer()</div><div class="line">upgrade each mongos</div><div class="line">upgrade<span class="built_in"> config </span>servers <span class="keyword">in</span>  backward</div><div class="line">upgrade each shard (replSet)</div><div class="line">	take lvm snapshot</div><div class="line"><span class="builtin-name">enable</span> the cluster balancer</div><div class="line">	sh.setBalancerState(<span class="literal">true</span>)</div></pre></td></tr></table></figure>
+
+        
+        
+        <p class="article-more-link">
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/05/14/kafka/" title="Kafka" itemprop="url">Kafka</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="White" target="_blank" itemprop="author">White</a>
+		
+  <p class="article-time">
+    <time datetime="2016-05-14T11:45:40.000Z" itemprop="datePublished"> 發表於 May 14 2016</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <h2 id="Architecture"><a href="#Architecture" class="headerlink" title="Architecture"></a>Architecture</h2><p><img src="/img/kafka.jpg" alt="kafka">  </p>
+<h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><p>Kafka是一个高效高可用大吞吐量的分布式的消息系统。<br>在kafka体系里，一类消息称为Topic,往topic发布消息的为Producer,从topic获取消息的称为Consumer，kafka作为一个集群组成集群的单个server称之为broker<br>不管还是producer和consumer都依赖于zookeeper来保证系统可用性及集群保存一些meta信息。<br>producer从zookeeper获取broker.list，以确保知道要将消息发送到哪些node上<br>comsumer从zookeeper获取offset,并实时更新消费过的offset.<br>一旦某个broker挂掉/阻塞/滞后，通过在zookeeper上注册，能自动感知某个节点挂了，从而producer不再往挂掉的broker发送消息；consumer则可以从新选举出来的leader处重新消费  </p>
+<p>Kafka提供的保证<br>1.producer发送给指定topic的partition上的消息可以保证按照顺序追加到log里。也就是说producer发送了两个消息M1,M2，如果M1先发送，那么M1在存储时拥有比M2更小的offset.<br>2.consumer会按照消息存储的顺序消费消息。<br>3.如果一个Topic有N个复制，可以容忍最多N-1台servers挂掉而不会有消息丢失。    </p>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2016/05/14/kafka/#more">Read More</a>
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/tech/">tech</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/kafka/">kafka</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/03/06/ftp/" title="FTP Work Mode" itemprop="url">FTP Work Mode</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="White" target="_blank" itemprop="author">White</a>
+		
+  <p class="article-time">
+    <time datetime="2016-03-06T14:41:20.000Z" itemprop="datePublished"> 發表於 Mar 6 2016</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <h2 id="PORT-mode"><a href="#PORT-mode" class="headerlink" title="PORT mode"></a>PORT mode</h2><p><img src="/img/ftp_port.jpg" alt="port"></p>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2016/03/06/ftp/#more">Read More</a>
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/tech/">tech</a>
+</div>
+
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/03/06/bind/" title="Bind DNS" itemprop="url">Bind DNS</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="White" target="_blank" itemprop="author">White</a>
+		
+  <p class="article-time">
+    <time datetime="2016-03-06T07:07:23.000Z" itemprop="datePublished"> 發表於 Mar 6 2016</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <h2 id="Parameters"><a href="#Parameters" class="headerlink" title="Parameters"></a>Parameters</h2><figure class="highlight routeros"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="variable">$TTL</span>: Time <span class="keyword">To</span> Live <span class="keyword">for</span> the zone file</div><div class="line"><span class="keyword">IN</span>: The Internet system</div><div class="line">SOA: Start Of Authority <span class="keyword">to</span> administer zone</div><div class="line">NS: Name<span class="built_in"> Server </span><span class="keyword">for</span> the zone</div><div class="line">MX: Mail Exchange <span class="keyword">for</span> the zone (needs a priority value)</div><div class="line">A:<span class="built_in"> Address </span>records <span class="keyword">for</span> hosts /<span class="built_in"> network </span>equipment</div><div class="line">CNAME: Canonical name <span class="keyword">for</span> an alias (points <span class="keyword">to</span> <span class="string">"A"</span> record)</div></pre></td></tr></table></figure>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2016/03/06/bind/#more">Read More</a>
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/tech/">tech</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/bind/">bind</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2016/03/06/es/" title="Elasticsearch" itemprop="url">Elasticsearch</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="White" target="_blank" itemprop="author">White</a>
+		
+  <p class="article-time">
+    <time datetime="2016-03-05T16:19:03.000Z" itemprop="datePublished"> 發表於 Mar 6 2016</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <h2 id="Installation"><a href="#Installation" class="headerlink" title="Installation"></a>Installation</h2><figure class="highlight crystal"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment">#jdk 7 required</span></div><div class="line">curl -L -O <span class="symbol">https:</span>/<span class="regexp">/download.elastic.co/elasticsearch</span><span class="regexp">/release/org</span><span class="regexp">/elasticsearch/distribution</span><span class="regexp">/tar/elasticsearch</span><span class="regexp">/2.2.0/elasticsearch</span>-<span class="number">2.2</span>.<span class="number">0</span>.tar.gz</div><div class="line">tar -xvf elasticsearch-<span class="number">2.2</span>.<span class="number">0</span>.tar.gz</div><div class="line">cd elasticsearch-<span class="number">2.2</span>.<span class="number">0</span>/bin</div><div class="line">./elasticsearch --cluster.name my_cluster_name --node.name my_node_name</div><div class="line"><span class="comment"># port 9200 is used for rest api</span></div></pre></td></tr></table></figure>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2016/03/06/es/#more">Read More</a>
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/tech/">tech</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/elasticsearch/">elasticsearch</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2014/11/13/githug/" title="Githug" itemprop="url">Githug</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="White" target="_blank" itemprop="author">White</a>
+		
+  <p class="article-time">
+    <time datetime="2014-11-13T15:52:14.000Z" itemprop="datePublished"> 發表於 Nov 13 2014</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <p> Installation<br><a href="https://github.com/Gazler/githug" target="_blank" rel="external">https://github.com/Gazler/githug</a><br> solution of all levels<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div></pre></td><td class="code"><pre><div class="line">[git_hug]<span class="comment"># git init .</span></div><div class="line">[git_hug]<span class="comment"># git config user.name cppking</span></div><div class="line">[git_hug]<span class="comment"># git config user.email cppking@126.com</span></div><div class="line">[git_hug]<span class="comment"># git add README</span></div><div class="line">[git_hug]<span class="comment"># git commit -a -m "first"</span></div><div class="line">[git_hug]<span class="comment"># git clone https://github.com/Gazler/cloneme.git</span></div><div class="line">[git_hug]<span class="comment"># git clone https://github.com/Gazler/cloneme my_cloned_rep</span></div><div class="line">[git_hug]<span class="comment"># echo '*.swp' &gt;&gt; .gitignore</span></div><div class="line">[git_hug]<span class="comment"># echo -e '*.a\n!lib.a' &gt;&gt; .gitignore</span></div><div class="line">[git_hug]<span class="comment"># git status</span></div><div class="line">how many will be commited:   2</div><div class="line">[git_hug]<span class="comment"># git rm deleteme.rb</span></div><div class="line">[git_hug]<span class="comment"># git rm --cached deleteme.rb</span></div><div class="line">[git_hug]<span class="comment"># git stash</span></div><div class="line">[git_hug]<span class="comment"># git mv oldfile.txt newfile.txt</span></div><div class="line">[git_hug]<span class="comment"># mkdir src</span></div><div class="line">[git_hug]<span class="comment"># git mv *.html src</span></div><div class="line">[git_hug]<span class="comment"># git log</span></div><div class="line">commit e86b6e9838de9a33d45f2b5ca09274a858c4693e</div><div class="line">[git_hug]<span class="comment"># git log</span></div><div class="line">commit e27d25fbd50c15639374d3e8195f8075d166b91f</div><div class="line">[git_hug]<span class="comment"># git tag new_tag e27d</span></div><div class="line">[git_hug]<span class="comment"># git push --tags origin master</span></div><div class="line">categories: [tech]</div><div class="line">[git_hug]<span class="comment"># git add forgotten_file.rb</span></div><div class="line">[git_hug]<span class="comment"># git commit --amend -m 'add forgotten file'</span></div><div class="line">[git_hug]<span class="comment"># date</span></div><div class="line">Fri Nov 14 00:16:36 CST 2014</div><div class="line">[git_hug]<span class="comment"># git commit --date='Fri Nov 15 00:16:36 CST 2014' -m 'some'</span></div><div class="line">[git_hug]<span class="comment"># git reset HEAD -- to_commit_second.rb</span></div><div class="line">[git_hug]<span class="comment"># git log --format=oneline</span></div><div class="line">427b79a3d384bbae6d0a9e891f4b9c5a0eec2474 Premature commit</div><div class="line">dc2843ef69155e2e7080f69d5963a2e58f5b1c84 Initial commit</div><div class="line">[git_hug]<span class="comment"># git reset --soft dc28</span></div><div class="line">[git_hug]<span class="comment"># git checkout HEAD -- config.rb</span></div><div class="line">[git_hug]<span class="comment"># git remote -v</span></div><div class="line">[git_hug]<span class="comment"># git remote -v</span></div><div class="line">[git_hug]<span class="comment"># git pull origin master</span></div><div class="line">[git_hug]<span class="comment"># git remote add origin https://github.com/githug/githug</span></div><div class="line">[git_hug]<span class="comment"># git rebase origin/master</span></div><div class="line">[git_hug]<span class="comment"># git push origin master</span></div><div class="line">[git_hug]<span class="comment"># git diff</span></div><div class="line">[git_hug]<span class="comment"># git blame config.rb</span></div><div class="line">[git_hug]<span class="comment"># git branch test_code</span></div><div class="line">[git_hug]<span class="comment"># git checkout -b my_branch</span></div><div class="line">[git_hug]<span class="comment"># git checkout v1.2</span></div><div class="line">[git_hug]<span class="comment"># git checkout tags/v1.2</span></div><div class="line">categories: [tech]</div><div class="line">[git_hug]<span class="comment"># git log</span></div><div class="line">commit 4b451e9e24ef5cdccd8ec79e06ec6143fb5cad4b</div><div class="line">commit e1968e6d2e0d95fe418d8d21a4de1b7ebe41da0e</div><div class="line">[git_hug]<span class="comment"># git checkout -b test_branch e196</span></div><div class="line">[git_hug]<span class="comment"># git branch -d delete_me</span></div><div class="line">[git_hug]<span class="comment"># git push origin test_branch</span></div><div class="line">[git_hug]<span class="comment"># git merge feature</span></div><div class="line">[git_hug]<span class="comment"># git fetch origin</span></div><div class="line">[git_hug]<span class="comment"># git repack -d</span></div><div class="line">[git_hug]<span class="comment"># git log  (on branch 'new-feature')</span></div><div class="line">[git_hug]<span class="comment"># git cherry-pick ca32</span></div><div class="line">[git_hug]<span class="comment"># git grep -i 'todo'</span></div><div class="line">[git_hug]<span class="comment"># git rebase -i HEAD~2 (edit)</span></div><div class="line">[git_hug]<span class="comment"># git rebase -i HEAD~3 (squash)</span></div><div class="line">[git_hug]<span class="comment"># git merge --squash long-feature-branch</span></div><div class="line">[git_hug]<span class="comment"># git commit (interactive)</span></div><div class="line">[git_hug]<span class="comment"># git rebase -i HEAD~3  (change commit order)</span></div><div class="line">[git_hug]<span class="comment"># git bisect </span></div><div class="line">[git_hug]<span class="comment"># git add --edit feature.rb</span></div><div class="line">[git_hug]<span class="comment"># git reflog</span></div><div class="line">[git_hug]<span class="comment"># git revert 2962</span></div><div class="line">[git_hug]<span class="comment"># git reflog</span></div><div class="line">[git_hug]<span class="comment"># git reset --hard 10d9</span></div><div class="line">[git_hug]<span class="comment"># git merge mybranch</span></div><div class="line">[git_hug]<span class="comment"># vim poem.txt</span></div><div class="line">[git_hug]<span class="comment"># git add poem.txt</span></div><div class="line">[git_hug]<span class="comment"># git commit</span></div></pre></td></tr></table></figure></p>
+
+        
+        
+        <p class="article-more-link">
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/tech/">tech</a>
+</div>
+
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2014/10/21/ha/" title="Openstack Controller HA" itemprop="url">Openstack Controller HA</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="White" target="_blank" itemprop="author">White</a>
+		
+  <p class="article-time">
+    <time datetime="2014-10-21T10:00:15.000Z" itemprop="datePublished"> 發表於 Oct 21 2014</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <h1 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h1><p>DHCP配合DNS进行主机定位<br>Kickstart进行OS自动安装<br>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2014/10/21/ha/#more">Read More</a>
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/tech/">tech</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/HA/">HA</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2014/08/19/zfs/" title="ZFS" itemprop="url">ZFS</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="White" target="_blank" itemprop="author">White</a>
+		
+  <p class="article-time">
+    <time datetime="2014-08-19T05:30:58.000Z" itemprop="datePublished"> 發表於 Aug 19 2014</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><ol>
+<li><p>zfs use the concept of <em>storage pool</em> to manage physical storage. It don’t have <em>volume manager</em> , filesystem is high-level than physical device.   </p>
+</li>
+<li><p>zfs is a transactional filesystem, which means the filesystem state is always  consistent on disk.  </p>
+</li>
+<li><p>snapshot is a read-only copy of a filesystem or volume and consume no additional space within the pool   </p>
+</li>
+<li><p>zfs provides a greatly simplified administration model, it has hierachical filesystem layout, automatic management of mount point and NFS share semantic  you can easily set quotas or reservations, turn compression on or off, or  manage mount point for numerous filesystems with a single command, you can send  or receive filesystem snapshot stream.  </p>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2014/08/19/zfs/#more">Read More</a>
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/tech/">tech</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/zfs/">zfs</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2014/08/15/mongodb-sharding/" title="Mongodb_sharding" itemprop="url">Mongodb_sharding</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="White" target="_blank" itemprop="author">White</a>
+		
+  <p class="article-time">
+    <time datetime="2014-08-15T02:38:34.000Z" itemprop="datePublished"> 發表於 Aug 15 2014</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><figure class="highlight oxygene"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Sharding <span class="keyword">is</span> a <span class="function"><span class="keyword">method</span> <span class="title">for</span> <span class="title">storing</span> <span class="title">data</span> <span class="title">across</span> <span class="title">multiple</span> <span class="title">machines</span>.  </span></div><div class="line"><span class="function"><span class="title">MongoDB</span> <span class="title">uses</span> <span class="title">sharding</span> <span class="title">to</span> <span class="title">support</span> <span class="title">deployments</span> <span class="title">with</span> <span class="title">very</span> <span class="title">large</span> <span class="title">data</span> <span class="title">sets</span> <span class="title">and</span> <span class="title">high</span> <span class="title">throughput</span> <span class="title">operations</span>.</span></div></pre></td></tr></table></figure>
+<h2 id="Sharding-architecture"><a href="#Sharding-architecture" class="headerlink" title="Sharding architecture"></a>Sharding architecture</h2><ol>
+<li>shards</li>
+<li>config servers (at least 3)</li>
+<li>query routers (at least 2)<br><img src="/img/mongo-sharding.png" alt="mongodb sharding">
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2014/08/15/mongodb-sharding/#more">Read More</a>
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/tech/">tech</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/mongodb/">mongodb</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+   
+    
+    <article class="post-expand post" itemprop="articleBody"> 
+        <header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2014/04/28/iscsi-setup/" title="Iscsi Setup" itemprop="url">Iscsi Setup</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="White" target="_blank" itemprop="author">White</a>
+		
+  <p class="article-time">
+    <time datetime="2014-04-27T21:52:36.000Z" itemprop="datePublished"> 發表於 Apr 28 2014</time>
+    
+  </p>
+</header>
+    <div class="article-content">
+        
+        <h2 id="target-server"><a href="#target-server" class="headerlink" title="target server"></a>target server</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">yum -y install scsi-target-utils</div><div class="line">vim /etc/tgt/targets.conf</div><div class="line">&lt;target iqn.2011-07.world.server:target0&gt;</div><div class="line">    <span class="comment"># provided devicce as a iSCSI target</span></div><div class="line">    backing-store /dev/vg_target00/lv_target00</div><div class="line">    <span class="comment"># iSCSI Initiator's IP address you allow to connect</span></div><div class="line">    initiator-address 10.0.0.0/24</div><div class="line">    <span class="comment"># authentication info ( set anyone you like for "username", "password" )</span></div><div class="line">    incominguser username password</div><div class="line">&lt;/target&gt;</div><div class="line">service tgtd start</div><div class="line">chkconfig tgtd on</div><div class="line">tgtadm --mode target --op show</div></pre></td></tr></table></figure>
+        
+        
+        <p class="article-more-link">
+          
+            <a href="/2014/04/28/iscsi-setup/#more">Read More</a>
+          
+       </p>
+    </div>
+    <footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/tech/">tech</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/linux/">linux</a><a href="/tags/iscsi/">iscsi</a>
+  </div>
+
+</div>
+
+
+
+
+<div class="comments-count">
+	
+</div>
+
+</footer>
+
+
+    </article>
+
+
+
+
+
+
+
+  <nav id="page-nav" class="clearfix">
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next<span></span></a>
+  </nav>
+
+</div>
+      <div class="openaside"><a class="navbutton" href="#" title="顯示側邊欄"></a></div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隱藏側邊欄"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="lazywhite" data-width="220" data-height="119" data-theme="medium">
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
+</div>
+  </div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分類</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/tech/" title="tech">tech<sup>16</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">標簽</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/linux/" title="linux">linux<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/kvm/" title="kvm">kvm<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/kafka/" title="kafka">kafka<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bind/" title="bind">bind<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/vmware/" title="vmware">vmware<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/elasticsearch/" title="elasticsearch">elasticsearch<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/galera/" title="galera">galera<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/openvswitch/" title="openvswitch">openvswitch<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/solaris/" title="solaris">solaris<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongodb/" title="mongodb">mongodb<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/NFV/" title="NFV">NFV<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HA/" title="HA">HA<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iscsi/" title="iscsi">iscsi<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zfs/" title="zfs">zfs<sup>1</sup></a></li>
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+		</ul>
+</div>
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 訂閱</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/lazywhite" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<a href="mailto:346816483@qq.com" target="_blank" class="icon-email" title="Email Me"></a>
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2017 
+		
+		<a href="/about" target="_blank" title="White">White</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回頂部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+ </html>

@@ -1,0 +1,529 @@
+
+ <!DOCTYPE HTML>
+<html lang="zh_CN">
+<head>
+  <meta charset="UTF-8">
+  
+    <title>ZFS | White&#39;s Blog</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no">
+    
+    <meta name="author" content="White">
+    
+
+    
+    <meta name="description" content="Introduction zfs use the concept of storage pool to manage physical storage. It don’t have volume manager , filesystem is high-level than physical device.     zfs is a transactional filesystem, which">
+<meta name="keywords" content="zfs">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ZFS">
+<meta property="og:url" content="http://lazywhite.github.io/2014/08/19/zfs/index.html">
+<meta property="og:site_name" content="White&#39;s Blog">
+<meta property="og:description" content="Introduction zfs use the concept of storage pool to manage physical storage. It don’t have volume manager , filesystem is high-level than physical device.     zfs is a transactional filesystem, which">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:updated_time" content="2017-07-28T15:36:12.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ZFS">
+<meta name="twitter:description" content="Introduction zfs use the concept of storage pool to manage physical storage. It don’t have volume manager , filesystem is high-level than physical device.     zfs is a transactional filesystem, which">
+
+    
+    <link rel="alternative" href="/atom.xml" title="White&#39;s Blog" type="application/atom+xml">
+    
+    
+    <link rel="icon" href="/img/favicon.ico">
+    
+    
+    <link rel="apple-touch-icon" href="/img/jacman.jpg">
+    <link rel="apple-touch-icon-precomposed" href="/img/jacman.jpg">
+    
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+  <body>
+    <header>
+      
+<div>
+		
+			<div id="textlogo">
+				<h1 class="site-name"><a href="/" title="White&#39;s Blog">White&#39;s Blog</a></h1>
+				<h2 class="blog-motto">生也有涯 而学也无涯</h2>
+			</div>
+			<div class="navbar"><a class="navbutton navmobile" href="#" title="菜單">
+			</a></div>
+			<nav class="animated">
+				<ul>
+					<ul>
+					 
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li>
+ 					
+						<form class="search" action="" target="_blank">
+							<label>Search</label>
+						<input name="s" type="hidden" value=  ><input type="text" name="q" size="30" placeholder="搜索"><br>
+						</form>
+					
+					</li>
+				</ul>
+			</nav>			
+</div>
+    </header>
+    <div id="container">
+      <div id="main" class="post" itemscope itemprop="blogPost">
+  
+	<article itemprop="articleBody"> 
+		<header class="article-info clearfix">
+  <h1 itemprop="name">
+    
+      <a href="/2014/08/19/zfs/" title="ZFS" itemprop="url">ZFS</a>
+  </h1>
+  <p class="article-author">By
+       
+		<a href="/about" title="White" target="_blank" itemprop="author">White</a>
+		
+  <p class="article-time">
+    <time datetime="2014-08-19T05:30:58.000Z" itemprop="datePublished"> 發表於 Aug 19 2014</time>
+    
+  </p>
+</header>
+	<div class="article-content">
+		
+		<div id="toc" class="toc-article">
+			<strong class="toc-title">文章目錄</strong>
+		
+			<ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Introduction"><span class="toc-number">1.</span> <span class="toc-text">Introduction</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Keyword"><span class="toc-number">2.</span> <span class="toc-text">Keyword</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#zpool"><span class="toc-number">3.</span> <span class="toc-text">zpool</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Usage"><span class="toc-number">3.1.</span> <span class="toc-text">Usage</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#zpool-property"><span class="toc-number">3.2.</span> <span class="toc-text">zpool property</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#zpool-health-status"><span class="toc-number">3.3.</span> <span class="toc-text">zpool health status</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#volume"><span class="toc-number">4.</span> <span class="toc-text">volume</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Topic"><span class="toc-number">5.</span> <span class="toc-text">Topic</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#How-to-replace-a-disk-in-a-zfs-Root-Pool"><span class="toc-number">5.1.</span> <span class="toc-text">How to replace a disk in a zfs Root Pool</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#how-to-create-a-BE-in-another-Root-Pool"><span class="toc-number">5.2.</span> <span class="toc-text">how to create a BE in another Root Pool</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#creating-a-new-pool-by-splitting-a-mirrored-zfs-storage-pool"><span class="toc-number">5.3.</span> <span class="toc-text">creating a new pool by splitting a mirrored zfs storage pool</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#how-to-migrate-a-Filesystem-to-ZFS"><span class="toc-number">5.4.</span> <span class="toc-text">how to migrate a Filesystem to ZFS</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#snapshot-and-clone"><span class="toc-number">5.5.</span> <span class="toc-text">snapshot and clone</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#replace-a-zfs-filesystem-with-a-ZFS-clone"><span class="toc-number">5.6.</span> <span class="toc-text">replace a zfs filesystem with a ZFS clone</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sending-and-receiving-zfs-data"><span class="toc-number">5.7.</span> <span class="toc-text">sending and receiving zfs data</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#using-a-zfs-volume-as-a-solaris-ISCSI-target"><span class="toc-number">5.8.</span> <span class="toc-text">using a zfs volume as a solaris ISCSI target</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#zfs-delegation"><span class="toc-number">5.9.</span> <span class="toc-text">zfs delegation</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#using-zfs-as-dump-or-swap-device"><span class="toc-number">5.10.</span> <span class="toc-text">using zfs as dump or swap device</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ZFS-backup-script"><span class="toc-number">6.</span> <span class="toc-text">ZFS backup script</span></a></li></ol>
+		
+		</div>
+		
+		<h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><ol>
+<li><p>zfs use the concept of <em>storage pool</em> to manage physical storage. It don’t have <em>volume manager</em> , filesystem is high-level than physical device.   </p>
+</li>
+<li><p>zfs is a transactional filesystem, which means the filesystem state is always  consistent on disk.  </p>
+</li>
+<li><p>snapshot is a read-only copy of a filesystem or volume and consume no additional space within the pool   </p>
+</li>
+<li><p>zfs provides a greatly simplified administration model, it has hierachical filesystem layout, automatic management of mount point and NFS share semantic  you can easily set quotas or reservations, turn compression on or off, or  manage mount point for numerous filesystems with a single command, you can send  or receive filesystem snapshot stream.  </p>
+<a id="more"></a>
+</li>
+</ol>
+<h2 id="Keyword"><a href="#Keyword" class="headerlink" title="Keyword"></a>Keyword</h2><figure class="highlight routeros"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">disk  </div><div class="line">pool</div><div class="line">    property  </div><div class="line"></div><div class="line">raidz  </div><div class="line">volume</div><div class="line">    property </div><div class="line">    share  </div><div class="line">snapshot</div></pre></td></tr></table></figure>
+<h2 id="zpool"><a href="#zpool" class="headerlink" title="zpool"></a>zpool</h2><h3 id="Usage"><a href="#Usage" class="headerlink" title="Usage"></a>Usage</h3><figure class="highlight routeros"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># zpool create &lt;pool_name&gt; &lt;type&gt; /path/to/disk ...</span></div><div class="line">zpool create tank<span class="built_in"> mirror </span>c1t0d0 c2t0d0<span class="built_in"> mirror </span>c3t0d0 c4t0d0</div><div class="line">zpool create<span class="built_in"> pool mirror </span>c0d0 c1d0 spare c2d0 c3d0(hot spare)</div><div class="line">zpool create<span class="built_in"> pool </span>c0d0 c1d0 log c2d0 (store intend log on specified device)</div><div class="line">zpool create<span class="built_in"> pool </span>c0d0 c1d0 cache c2d0 c3d0(<span class="keyword">for</span> read-heavy workload,cache)</div><div class="line">echo | format(list all bricks <span class="keyword">in</span> /dev/dsk/)</div><div class="line">zpool iostat -v tank 2</div><div class="line">zpool status -v[l] tank</div><div class="line">zpool status -x</div><div class="line">zpool <span class="builtin-name">add</span> tank raidz3 c2t1d0 c2t2d0 c2t3d0</div><div class="line">zpool <span class="builtin-name">add</span> tank log<span class="built_in"> mirror </span>c0t0d0 c1t0d0</div><div class="line">zpool clean tank [brick] (clean <span class="builtin-name">error</span> count of zpool)</div><div class="line">zpool replace tank c1t1d0 [c1t2d0](whether disk is <span class="keyword">in</span> the same location)</div><div class="line">zpool attach<span class="built_in"> pool </span>&lt;device&gt; &lt;new device&gt; (mirror)</div><div class="line">zpool detach (spare <span class="keyword">or</span> failed )</div><div class="line">zpool <span class="builtin-name">export</span> &lt;pool&gt;(pool must command whole disk)</div><div class="line">zpool import [-d] (<span class="keyword">if</span> device is <span class="keyword">not</span> <span class="keyword">in</span><span class="built_in"> default </span>/dev/dsk/)</div><div class="line">zpool <span class="builtin-name">get</span> all tank</div><div class="line">zpool list -H(headless,script mode) -o name,size (properties)</div><div class="line">zpool history</div><div class="line">zpool upgrade(online upgrade)</div><div class="line">zpool <span class="builtin-name">set</span> <span class="attribute">autoexpand</span>=on rpool</div></pre></td></tr></table></figure>
+<h3 id="zpool-property"><a href="#zpool-property" class="headerlink" title="zpool property"></a>zpool property</h3><figure class="highlight routeros"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">allocated,capacity,free = 已分配,比率</div><div class="line">autoreplace</div><div class="line">altroot = alternate root directory</div><div class="line">bootfs</div><div class="line">cachefile</div><div class="line">dedupditto</div><div class="line">dedupratio</div><div class="line">delegation = 委派，托管</div><div class="line">failmode</div><div class="line">guid</div><div class="line">health</div><div class="line">listshares = whether display share information when use *zfs list*</div><div class="line">listsnapshots </div><div class="line">readonly</div><div class="line">size</div><div class="line">version</div></pre></td></tr></table></figure>
+<h3 id="zpool-health-status"><a href="#zpool-health-status" class="headerlink" title="zpool health status"></a>zpool health status</h3><figure class="highlight applescript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">degraded</div><div class="line">online</div><div class="line">suspended</div><div class="line">unavail</div><div class="line"></div><div class="line">**zpool status** also provides information <span class="keyword">about</span> scrub <span class="keyword">or</span> resilver details</div></pre></td></tr></table></figure>
+<h2 id="volume"><a href="#volume" class="headerlink" title="volume"></a>volume</h2><figure class="highlight applescript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">zfs create  tank/volume</div><div class="line">zfs <span class="keyword">set</span> mountpoint=/export/volume  tank/volume</div><div class="line">zfs <span class="keyword">set</span> share.nfs=<span class="keyword">on</span> tank/volume</div><div class="line">zfs <span class="keyword">set</span> compression=<span class="keyword">on</span> tank/volume</div><div class="line">zfs <span class="keyword">set</span> quota=<span class="number">30</span>G　tank/volume</div><div class="line">zfs <span class="keyword">set</span> volsize=<span class="number">10</span>G rpool/dump(resize <span class="keyword">the</span> <span class="literal">space</span> <span class="keyword">of</span> volume)</div><div class="line">zfs <span class="keyword">get</span> compression tank/volume</div><div class="line">zfs <span class="keyword">get</span> all tank/volume</div><div class="line">zfs rename tank/volume tank/volume_old</div><div class="line">zfs <span class="keyword">set</span> <span class="keyword">copy</span>=&lt;<span class="number">1</span>|<span class="number">2</span>|<span class="number">3</span>&gt; tank/volume(ditto,multiple metadata)</div><div class="line">zfs <span class="keyword">set</span> dedup=<span class="keyword">on</span> (<span class="literal">space</span> saving, although deduplication <span class="keyword">is</span> <span class="keyword">set</span> <span class="keyword">as</span> filesystem <span class="keyword">property</span>,  </div><div class="line"><span class="keyword">it</span>'s scope <span class="keyword">is</span> pool-wide)</div><div class="line">zfs mount |grep tank/volume</div><div class="line">zfs <span class="keyword">get</span> share.nfs.all tank/volume  (/etc/dfs/sharetab)</div><div class="line">zfs <span class="keyword">set</span> share.nfs.&lt;anon|rw|nosuid&gt; tank/volume</div><div class="line">zfs <span class="built_in">list</span> -t &lt;share|snapshot|all&gt;</div></pre></td></tr></table></figure>
+<h2 id="Topic"><a href="#Topic" class="headerlink" title="Topic"></a>Topic</h2><h3 id="How-to-replace-a-disk-in-a-zfs-Root-Pool"><a href="#How-to-replace-a-disk-in-a-zfs-Root-Pool" class="headerlink" title="How to replace a disk in a zfs Root Pool"></a>How to replace a disk in a zfs Root Pool</h3><figure class="highlight llvm"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">zpool offline rpool <span class="keyword">c</span><span class="number">1</span>t<span class="number">0</span>d<span class="number">0</span>s<span class="number">0</span></div><div class="line">cfgadm -<span class="keyword">c</span> unconfigure <span class="keyword">c</span><span class="number">1</span>::dsk/<span class="keyword">c</span><span class="number">1</span>t<span class="number">0</span>d<span class="number">0</span></div><div class="line">&lt;physical remove failed disk <span class="keyword">c</span><span class="number">1</span>t<span class="number">0</span>d<span class="number">0</span>&gt;</div><div class="line">&lt;physical insert new disk <span class="keyword">c</span><span class="number">1</span>t<span class="number">0</span>d<span class="number">0</span>&gt;</div><div class="line">cfgadm -<span class="keyword">c</span> configure <span class="keyword">c</span><span class="number">1</span>::dsk/<span class="keyword">c</span><span class="number">1</span>t<span class="number">0</span>d<span class="number">0</span></div><div class="line">zpool replace rpool <span class="keyword">c</span><span class="number">1</span>t<span class="number">0</span>d<span class="number">0</span>s<span class="number">0</span></div><div class="line">zpool online rpool <span class="keyword">c</span><span class="number">1</span>t<span class="number">0</span>d<span class="number">0</span>s<span class="number">0</span></div><div class="line">zpool status rpool </div><div class="line">&lt;let disk resilver before installing the boot blocks&gt;</div><div class="line">bootadm install-bootloader</div></pre></td></tr></table></figure>
+<h3 id="how-to-create-a-BE-in-another-Root-Pool"><a href="#how-to-create-a-BE-in-another-Root-Pool" class="headerlink" title="how to create a BE in another Root Pool"></a>how to create a BE in another Root Pool</h3><figure class="highlight gams"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">zpool create -B rpool2 c2t2d0</div><div class="line">beadm create -p rpool2 solaris2</div><div class="line">bootadm install-bootloader -P rpool2</div><div class="line">zpool <span class="keyword">set</span> bootfs=rpool2/ROOT/solaris2 <span class="comment">rpool2</span></div><div class="line">beadm <span class="comment">activate solaris2 (then reboot)</span></div><div class="line">zfs <span class="comment">create -V 4g rpool2</span>/swap </div><div class="line">/<span class="comment">dev</span>/zvol/<span class="comment">dsk</span>/rpool2/<span class="comment">swap - - swap - no -(add it to</span> /etc/<span class="comment">vfstab)</span></div><div class="line">zfs <span class="comment">create -V 4g rpool2</span>/dump</div><div class="line">dumpadm -d /<span class="comment">dev</span>/zvol/<span class="comment">dsk</span>/rpool2/<span class="comment">dump(recreate the dump device)</span></div></pre></td></tr></table></figure>
+<h3 id="creating-a-new-pool-by-splitting-a-mirrored-zfs-storage-pool"><a href="#creating-a-new-pool-by-splitting-a-mirrored-zfs-storage-pool" class="headerlink" title="creating a new pool by splitting a mirrored zfs storage pool"></a>creating a new pool by splitting a <strong>mirrored</strong> zfs storage pool</h3><figure class="highlight swift"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">zpool <span class="built_in">split</span> tank tank2 &amp;&amp; zpool <span class="keyword">import</span> tank2</div></pre></td></tr></table></figure>
+<h3 id="how-to-migrate-a-Filesystem-to-ZFS"><a href="#how-to-migrate-a-Filesystem-to-ZFS" class="headerlink" title="how to migrate a Filesystem to ZFS"></a>how to migrate a Filesystem to ZFS</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">pkg <span class="keyword">install</span> shadow-<span class="keyword">migration</span></div><div class="line">svcadm <span class="keyword">enable</span> shadowd</div><div class="line">zfs <span class="keyword">set</span> readonly=<span class="keyword">on</span> tank/vol (migrate <span class="keyword">local</span> zfs filesystem)</div><div class="line"><span class="keyword">share</span> -F nfs -o ro /<span class="keyword">export</span>/home/ufsdata  </div><div class="line"><span class="keyword">share</span></div><div class="line">zfs <span class="keyword">create</span> -o shadow=<span class="keyword">file</span>:///rpool/<span class="keyword">old</span> <span class="keyword">users</span>/home/shadow</div><div class="line">zfs <span class="keyword">create</span> -o shadow=nfs://neo/<span class="keyword">export</span>/home/ufsdata <span class="keyword">users</span>/home/shadow</div><div class="line">shadowstat</div><div class="line"><span class="keyword">when</span> the <span class="keyword">migration</span> <span class="keyword">is</span> done, zfs <span class="keyword">get</span> shadow <span class="keyword">users</span>/home/shadow = <span class="keyword">none</span></div></pre></td></tr></table></figure>
+<h3 id="snapshot-and-clone"><a href="#snapshot-and-clone" class="headerlink" title="snapshot and clone"></a>snapshot and clone</h3><figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">recursive snapshots are created quickly <span class="keyword">as</span> <span class="literal">one</span> atomic operation  </div><div class="line">snapshot can <span class="keyword">not</span> access directly, they can be cloned,backed up,rolled back,</div><div class="line">snapshot have no modified properties </div><div class="line"><span class="keyword">a</span> dataset cannot be destroyed <span class="keyword">if</span> snapshots <span class="keyword">of</span> dataset exist </div><div class="line">holding <span class="keyword">a</span> snapshot prevents <span class="keyword">it</span> <span class="built_in">from</span> being destroyed </div><div class="line"></div><div class="line">zfs snapshot -r tank@<span class="keyword">first</span></div><div class="line">zfs destroy -r tank@<span class="keyword">first</span></div><div class="line">zfs hold [-r] keep tank/volume@<span class="built_in">sec</span>  \\ zfs destroy -d tank/volume@<span class="built_in">sec</span></div><div class="line">zfs holds [-r] tank/volume@<span class="built_in">sec</span></div><div class="line">zfs release -r keep tank/volume@<span class="built_in">sec</span></div><div class="line">zfs <span class="built_in">rename</span> tank/vol@now tommorow ( <span class="built_in">rename</span> can only used <span class="keyword">in</span> same pool)</div><div class="line">zfs list -o <span class="literal">space</span> -r tank</div><div class="line">zfs rollback(<span class="keyword">the</span> filesystem reverts <span class="built_in">to</span> its state <span class="keyword">at</span> <span class="keyword">the</span> <span class="built_in">time</span> <span class="keyword">the</span> snapshot  </div><div class="line">was taken,<span class="keyword">by</span> default <span class="keyword">the</span> most recent snapshot)</div><div class="line">zfs rollback [-r|R] (force <span class="built_in">delete</span> intermediate snapshot) tank/vol</div><div class="line">zfs list -t snapshot -o name,creation tank/vol (+ - M R)</div><div class="line"></div><div class="line"><span class="comment">#clone is a writable volume or filesystem,whose initial contents are the</span></div><div class="line">same <span class="keyword">as</span> <span class="keyword">the</span> dataset <span class="built_in">from</span> which <span class="keyword">it</span> was created</div><div class="line">clone can only be created <span class="built_in">from</span> snapshot, <span class="keyword">the</span> original snapshot cannot be  </div><div class="line">destroyed <span class="keyword">if</span> <span class="keyword">any</span> clone exists.</div><div class="line">clones <span class="built_in">do</span> <span class="keyword">not</span> inherit <span class="keyword">the</span> properties <span class="keyword">of</span> <span class="keyword">the</span> dataset <span class="built_in">from</span> which <span class="keyword">it</span> was created</div><div class="line">clone has modified properties</div></pre></td></tr></table></figure>
+<h3 id="replace-a-zfs-filesystem-with-a-ZFS-clone"><a href="#replace-a-zfs-filesystem-with-a-ZFS-clone" class="headerlink" title="replace a zfs filesystem with a ZFS clone"></a>replace a zfs filesystem with a ZFS clone</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">zfs <span class="keyword">create</span> tank/<span class="keyword">test</span></div><div class="line">zfs <span class="keyword">create</span> tank/<span class="keyword">test</span>/productA</div><div class="line">zfs <span class="keyword">snapshot</span> tank/<span class="keyword">test</span>/productA@today</div><div class="line">zfs <span class="keyword">clone</span> tank/<span class="keyword">test</span>/productA@today tank/<span class="keyword">test</span>/productAbeta</div><div class="line">zfs <span class="keyword">list</span> -r tank/<span class="keyword">test</span></div><div class="line">zfs promote tank/<span class="keyword">test</span>/productAbeta</div><div class="line">zfs <span class="keyword">list</span> -r tank/<span class="keyword">test</span></div><div class="line">zfs <span class="keyword">rename</span> tank/<span class="keyword">test</span>/productA tank/<span class="keyword">test</span>/productAlegacy</div><div class="line">zfs <span class="keyword">rename</span> tank/<span class="keyword">test</span>/productAbeta tank/<span class="keyword">test</span>/productA</div><div class="line">zfs destroy tank/<span class="keyword">test</span>/productAlegacy</div></pre></td></tr></table></figure>
+<h3 id="sending-and-receiving-zfs-data"><a href="#sending-and-receiving-zfs-data" class="headerlink" title="sending and receiving zfs data"></a>sending and receiving zfs data</h3><figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">zfs <span class="built_in">send</span> <span class="keyword">command</span> <span class="title">creates</span> <span class="title">a</span> <span class="title">stream</span> <span class="title">representation</span> <span class="title">of</span> <span class="title">a</span> <span class="title">snapshot</span> <span class="title">that</span> <span class="title">is</span> <span class="title">written</span></div><div class="line"><span class="built_in">to</span> standart output. By default, <span class="keyword">a</span> full stream is generated, you can redirect </div><div class="line"><span class="keyword">the</span> output <span class="built_in">to</span> <span class="keyword">a</span> <span class="built_in">file</span> <span class="keyword">or</span> <span class="built_in">to</span> <span class="keyword">a</span> different <span class="keyword">system</span>.</div><div class="line">  </div><div class="line">zfs receive <span class="keyword">command</span> <span class="title">creates</span> <span class="title">a</span> <span class="title">snapshot</span> <span class="title">whose</span> <span class="title">content</span> <span class="title">are</span> <span class="title">specified</span> <span class="title">in</span> <span class="title">the</span> <span class="title">stream</span> </div><div class="line">that is provided <span class="keyword">on</span> <span class="title">standart</span> <span class="title">input</span> , <span class="title">If</span> <span class="title">a</span> <span class="title">full</span> <span class="title">stream</span> <span class="title">is</span> <span class="title">received</span>, <span class="title">a</span> <span class="title">new</span> <span class="title">filesystem</span>  </div><div class="line">is created <span class="keyword">as</span> well.</div><div class="line"></div><div class="line"><span class="comment"># snapshot stream type: Full stream, Incremental stream</span></div><div class="line">stream package is <span class="keyword">a</span> stream type that <span class="keyword">contains</span> <span class="literal">one</span> <span class="keyword">or</span> more full <span class="keyword">or</span> incremental </div><div class="line">streams , <span class="literal">three</span> types <span class="keyword">of</span> stream package exist:</div><div class="line">	Replication stream package</div><div class="line">	Recursive stream package </div><div class="line">	Self-contained recursive stream package </div><div class="line"></div><div class="line">zfs <span class="built_in">send</span> -R (all dataset,<span class="built_in">include</span> hierachy)</div><div class="line">zfs <span class="built_in">send</span> -I (all increment)</div></pre></td></tr></table></figure>
+<h3 id="using-a-zfs-volume-as-a-solaris-ISCSI-target"><a href="#using-a-zfs-volume-as-a-solaris-ISCSI-target" class="headerlink" title="using a zfs volume as a solaris ISCSI target"></a>using a zfs volume as a solaris ISCSI target</h3><figure class="highlight dos"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">zfs create tank/<span class="built_in">vol</span></div><div class="line">zfs <span class="built_in">set</span> shareiscsi=on tank/<span class="built_in">vol</span></div><div class="line">iscsiadm list target</div><div class="line">zfs <span class="built_in">rename</span> tank/<span class="built_in">vol</span> tank/volume</div></pre></td></tr></table></figure>
+<h3 id="zfs-delegation"><a href="#zfs-delegation" class="headerlink" title="zfs delegation"></a>zfs delegation</h3><figure class="highlight dos"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">zfs allow cindy create,destroy,mount,snapshot tank/<span class="built_in">vol</span></div><div class="line">zfs unallow cindy tank/<span class="built_in">vol</span></div><div class="line">&lt;cindy&gt; zfs create tank/<span class="built_in">vol</span> (can't mount, change the owner of /tank/<span class="built_in">vol</span>)</div><div class="line">chmod A+user:cindy:add_subdirectory:fd:allow /tank</div><div class="line"># zfs allow staff create,mount tank/home</div><div class="line"># zfs allow -c create,destroy tank/home(create <span class="built_in">time</span>)</div><div class="line">zfs allow -s @myset create,destroy,mount,snapshot,promote,clone,readonly tank(permission <span class="built_in">set</span>)</div><div class="line">zfs allow staff @myset,<span class="built_in">rename</span> tank</div><div class="line">chmod A+group:staff:add_subdirectory:fd:allow tank</div></pre></td></tr></table></figure>
+<h3 id="using-zfs-as-dump-or-swap-device"><a href="#using-zfs-as-dump-or-swap-device" class="headerlink" title="using zfs as dump or swap device"></a>using zfs as dump or swap device</h3><figure class="highlight avrasm"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">swap</span> -l</div><div class="line">dumpadm</div><div class="line">zfs create -V <span class="number">2</span>G rpool/swap2</div><div class="line"><span class="keyword">swap</span> -a /dev/zvol/dsk/rpool/swap2</div></pre></td></tr></table></figure>
+<h2 id="ZFS-backup-script"><a href="#ZFS-backup-script" class="headerlink" title="ZFS backup script"></a>ZFS backup script</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#!/bin/bash</span></div><div class="line"><span class="comment">## you should use "zfs snapshot -r tank@date ; zfs send -R tank@date | ssh xxx zfs recv " for the</span></div><div class="line"><span class="comment">## very first time data full backup.</span></div><div class="line"><span class="comment">## then this script will send incremental snapshot stream to backup server,  find out new volumes </span></div><div class="line"><span class="comment">## and send full data stream to backup server</span></div><div class="line"></div><div class="line"><span class="comment">## tips: snapshots consume no extra disk space,so there is no need to delete them.</span></div><div class="line"></div><div class="line"><span class="built_in">export</span> PATH=/usr/bin:/usr/sbin</div><div class="line">. /opt/pre-snap-date</div><div class="line"><span class="built_in">export</span> current_date=`date +%F`</div><div class="line"><span class="built_in">export</span> pre_volume_list=/opt/volume-list-<span class="variable">$pre_snap_date</span></div><div class="line"><span class="built_in">export</span> current_volume_list=/opt/volume-list-<span class="variable">$current_date</span></div><div class="line"><span class="built_in">export</span> backup_server=172.16.16.14</div><div class="line"></div><div class="line">zfs list -o name -H -r tank |grep -v <span class="string">'^tank$'</span> &gt; <span class="variable">$current_volume_list</span></div><div class="line">zfs snapshot -r tank@<span class="variable">$current_date</span></div><div class="line"></div><div class="line"><span class="built_in">echo</span> <span class="string">'sending snapshot ...'</span></div><div class="line"></div><div class="line">egrep -f <span class="variable">$pre_volume_list</span>  <span class="variable">$current_volume_list</span> | <span class="keyword">while</span> <span class="built_in">read</span> line;<span class="keyword">do</span></div><div class="line">        zfs send -i <span class="variable">$line</span>@<span class="variable">$pre_snap_date</span> <span class="variable">$line</span>@<span class="variable">$current_date</span> | ssh <span class="variable">$backup_server</span> zfs recv -vF -d tank </div><div class="line"><span class="keyword">done</span></div><div class="line"></div><div class="line"><span class="built_in">echo</span> <span class="string">'sending new volumes ...'</span></div><div class="line"></div><div class="line">egrep -vf <span class="variable">$pre_volume_list</span>  <span class="variable">$current_volume_list</span> | <span class="keyword">while</span> <span class="built_in">read</span> line;<span class="keyword">do</span></div><div class="line">        zfs send  <span class="variable">$line</span>@current_date | ssh <span class="variable">$backup_server</span> zfs recv -vF -d tank </div><div class="line">        sleep 60</div><div class="line"><span class="keyword">done</span> </div><div class="line"></div><div class="line">cat &gt; /opt/pre-snap-date &lt;&lt;EOF</div><div class="line"><span class="built_in">export</span> pre_snap_date=<span class="variable">$current_date</span></div><div class="line">EOF</div></pre></td></tr></table></figure>
+  
+	</div>
+		<footer class="article-footer clearfix">
+<div class="article-catetags">
+
+<div class="article-categories">
+  <span></span>
+  <a class="article-category-link" href="/categories/tech/">tech</a>
+</div>
+
+
+  <div class="article-tags">
+  
+  <span></span> <a href="/tags/zfs/">zfs</a>
+  </div>
+
+</div>
+
+
+
+	<div class="article-share" id="share">
+	
+	  <div data-url="http://lazywhite.github.io/2014/08/19/zfs/" data-title="ZFS | White&#39;s Blog" data-tsina="" class="share clearfix">
+	  </div>
+	
+	</div>
+
+
+</footer>
+
+   	       
+	</article>
+	
+<nav class="article-nav clearfix">
+ 
+ <div class="prev" >
+ <a href="/2014/10/21/ha/" title="Openstack Controller HA">
+  <strong>上一篇：</strong><br/>
+  <span>
+  Openstack Controller HA</span>
+</a>
+</div>
+
+
+<div class="next">
+<a href="/2014/08/15/mongodb-sharding/"  title="Mongodb_sharding">
+ <strong>下一篇：</strong><br/> 
+ <span>Mongodb_sharding
+</span>
+</a>
+</div>
+
+</nav>
+
+	
+
+</div>  
+      <div class="openaside"><a class="navbutton" href="#" title="顯示側邊欄"></a></div>
+
+  <div id="toc" class="toc-aside">
+  <strong class="toc-title">文章目錄</strong>
+ 
+ <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#Introduction"><span class="toc-number">1.</span> <span class="toc-text">Introduction</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Keyword"><span class="toc-number">2.</span> <span class="toc-text">Keyword</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#zpool"><span class="toc-number">3.</span> <span class="toc-text">zpool</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Usage"><span class="toc-number">3.1.</span> <span class="toc-text">Usage</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#zpool-property"><span class="toc-number">3.2.</span> <span class="toc-text">zpool property</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#zpool-health-status"><span class="toc-number">3.3.</span> <span class="toc-text">zpool health status</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#volume"><span class="toc-number">4.</span> <span class="toc-text">volume</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Topic"><span class="toc-number">5.</span> <span class="toc-text">Topic</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#How-to-replace-a-disk-in-a-zfs-Root-Pool"><span class="toc-number">5.1.</span> <span class="toc-text">How to replace a disk in a zfs Root Pool</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#how-to-create-a-BE-in-another-Root-Pool"><span class="toc-number">5.2.</span> <span class="toc-text">how to create a BE in another Root Pool</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#creating-a-new-pool-by-splitting-a-mirrored-zfs-storage-pool"><span class="toc-number">5.3.</span> <span class="toc-text">creating a new pool by splitting a mirrored zfs storage pool</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#how-to-migrate-a-Filesystem-to-ZFS"><span class="toc-number">5.4.</span> <span class="toc-text">how to migrate a Filesystem to ZFS</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#snapshot-and-clone"><span class="toc-number">5.5.</span> <span class="toc-text">snapshot and clone</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#replace-a-zfs-filesystem-with-a-ZFS-clone"><span class="toc-number">5.6.</span> <span class="toc-text">replace a zfs filesystem with a ZFS clone</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#sending-and-receiving-zfs-data"><span class="toc-number">5.7.</span> <span class="toc-text">sending and receiving zfs data</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#using-a-zfs-volume-as-a-solaris-ISCSI-target"><span class="toc-number">5.8.</span> <span class="toc-text">using a zfs volume as a solaris ISCSI target</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#zfs-delegation"><span class="toc-number">5.9.</span> <span class="toc-text">zfs delegation</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#using-zfs-as-dump-or-swap-device"><span class="toc-number">5.10.</span> <span class="toc-text">using zfs as dump or swap device</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#ZFS-backup-script"><span class="toc-number">6.</span> <span class="toc-text">ZFS backup script</span></a></li></ol>
+ 
+  </div>
+
+<div id="asidepart">
+<div class="closeaside"><a class="closebutton" href="#" title="隱藏側邊欄"></a></div>
+<aside class="clearfix">
+
+  
+<div class="github-card">
+<p class="asidetitle">Github 名片</p>
+<div class="github-card" data-github="lazywhite" data-width="220" data-height="119" data-theme="medium">
+<script type="text/javascript" src="//cdn.jsdelivr.net/github-cards/latest/widget.js" ></script>
+</div>
+  </div>
+
+
+
+  
+<div class="categorieslist">
+	<p class="asidetitle">分類</p>
+		<ul>
+		
+		  
+			<li><a href="/categories/tech/" title="tech">tech<sup>16</sup></a></li>
+		  
+		
+		</ul>
+</div>
+
+
+  
+<div class="tagslist">
+	<p class="asidetitle">標簽</p>
+		<ul class="clearfix">
+		
+			
+				<li><a href="/tags/linux/" title="linux">linux<sup>3</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/kvm/" title="kvm">kvm<sup>2</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/kafka/" title="kafka">kafka<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/bind/" title="bind">bind<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/vmware/" title="vmware">vmware<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/elasticsearch/" title="elasticsearch">elasticsearch<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mysql/" title="mysql">mysql<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/galera/" title="galera">galera<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/openvswitch/" title="openvswitch">openvswitch<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/solaris/" title="solaris">solaris<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/mongodb/" title="mongodb">mongodb<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/NFV/" title="NFV">NFV<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/HA/" title="HA">HA<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/iscsi/" title="iscsi">iscsi<sup>1</sup></a></li>
+			
+		
+			
+				<li><a href="/tags/zfs/" title="zfs">zfs<sup>1</sup></a></li>
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+			
+		
+		</ul>
+</div>
+
+
+  <div class="rsspart">
+	<a href="/atom.xml" target="_blank" title="rss">RSS 訂閱</a>
+</div>
+
+</aside>
+</div>
+    </div>
+    <footer><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<div class="social-font" class="clearfix">
+		
+		
+		<a href="https://github.com/lazywhite" target="_blank" class="icon-github" title="github"></a>
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		<a href="mailto:346816483@qq.com" target="_blank" class="icon-email" title="Email Me"></a>
+		
+	</div>
+			
+		
+
+		<p class="copyright">
+		Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/wuchong/jacman" target="_blank" title="Jacman">Jacman</a> © 2017 
+		
+		<a href="/about" target="_blank" title="White">White</a>
+		
+		
+		</p>
+</div>
+</footer>
+    <script src="/js/jquery-2.0.3.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/jquery.qrcode-0.12.0.min.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.navbar').click(function(){
+    $('header nav').toggleClass('shownav');
+  });
+  var myWidth = 0;
+  function getSize(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+  };
+  var m = $('#main'),
+      a = $('#asidepart'),
+      c = $('.closeaside'),
+      o = $('.openaside');
+  c.click(function(){
+    a.addClass('fadeOut').css('display', 'none');
+    o.css('display', 'block').addClass('fadeIn');
+    m.addClass('moveMain');
+  });
+  o.click(function(){
+    o.css('display', 'none').removeClass('beforeFadeIn');
+    a.css('display', 'block').removeClass('fadeOut').addClass('fadeIn');      
+    m.removeClass('moveMain');
+  });
+  $(window).scroll(function(){
+    o.css("top",Math.max(80,260-$(this).scrollTop()));
+  });
+  
+  $(window).resize(function(){
+    getSize(); 
+    if (myWidth >= 1024) {
+      $('header nav').removeClass('shownav');
+    }else{
+      m.removeClass('moveMain');
+      a.css('display', 'block').removeClass('fadeOut');
+      o.css('display', 'none');
+      
+      $('#toc.toc-aside').css('display', 'none');
+        
+    }
+  });
+});
+</script>
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var ai = $('.article-content>iframe'),
+      ae = $('.article-content>embed'),
+      t  = $('#toc'),
+      ta = $('#toc.toc-aside'),
+      o  = $('.openaside'),
+      c  = $('.closeaside');
+  if(ai.length>0){
+    ai.wrap('<div class="video-container" />');
+  };
+  if(ae.length>0){
+   ae.wrap('<div class="video-container" />');
+  };
+  c.click(function(){
+    ta.css('display', 'block').addClass('fadeIn');
+  });
+  o.click(function(){
+    ta.css('display', 'none');
+  });
+  $(window).scroll(function(){
+    ta.css("top",Math.max(140,320-$(this).scrollTop()));
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){ 
+  var $this = $('.share'),
+      url = $this.attr('data-url'),
+      encodedUrl = encodeURIComponent(url),
+      title = $this.attr('data-title'),
+      tsina = $this.attr('data-tsina'),
+      description = $this.attr('description');
+  var html = [
+  '<div class="hoverqrcode clearfix"></div>',
+  '<a class="overlay" id="qrcode"></a>',
+  '<a href="https://www.facebook.com/sharer.php?u=' + encodedUrl + '" class="article-share-facebook" target="_blank" title="Facebook"></a>',
+  '<a href="https://twitter.com/intent/tweet?url=' + encodedUrl + '" class="article-share-twitter" target="_blank" title="Twitter"></a>',
+  '<a href="#qrcode" class="article-share-qrcode" title="微信"></a>',
+  '<a href="http://widget.renren.com/dialog/share?resourceUrl=' + encodedUrl + '&srcUrl=' + encodedUrl + '&title=' + title +'" class="article-share-renren" target="_blank" title="人人"></a>',
+  '<a href="http://service.weibo.com/share/share.php?title='+title+'&url='+encodedUrl +'&ralateUid='+ tsina +'&searchPic=true&style=number' +'" class="article-share-weibo" target="_blank" title="微博"></a>',
+  '<span title="Share to"></span>'
+  ].join('');
+  $this.append(html);
+
+  $('.hoverqrcode').hide();
+
+  var myWidth = 0;
+  function updatehoverqrcode(){
+    if( typeof( window.innerWidth ) == 'number' ) {
+      myWidth = window.innerWidth;
+    } else if( document.documentElement && document.documentElement.clientWidth) {
+      myWidth = document.documentElement.clientWidth;
+    };
+    var qrsize = myWidth > 1024 ? 200:100;
+    var options = {render: 'image', size: qrsize, fill: '#2ca6cb', text: url, radius: 0.5, quiet: 1};
+    var p = $('.article-share-qrcode').position();
+    $('.hoverqrcode').empty().css('width', qrsize).css('height', qrsize)
+                          .css('left', p.left-qrsize/2+20).css('top', p.top-qrsize-10)
+                          .qrcode(options);
+  };
+  $(window).resize(function(){
+    $('.hoverqrcode').hide();
+  });
+  $('.article-share-qrcode').click(function(){
+    updatehoverqrcode();
+    $('.hoverqrcode').toggle();
+  });
+  $('.article-share-qrcode').hover(function(){}, function(){
+      $('.hoverqrcode').hide();
+  });
+});   
+</script>
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+$(document).ready(function(){ 
+  $('.article-content').each(function(i){
+    $(this).find('img').each(function(){
+      if ($(this).parent().hasClass('fancybox')) return;
+      var alt = this.alt;
+      if (alt) $(this).after('<span class="caption">' + alt + '</span>');
+      $(this).wrap('<a href="' + this.src + '" title="' + alt + '" class="fancybox"></a>');
+    });
+    $(this).find('.fancybox').each(function(){
+      $(this).attr('rel', 'article' + i);
+    });
+  });
+  if($.fancybox){
+    $('.fancybox').fancybox();
+  }
+}); 
+</script>
+
+
+
+<!-- Analytics Begin -->
+
+
+
+
+
+<!-- Analytics End -->
+
+<!-- Totop Begin -->
+
+	<div id="totop">
+	<a title="返回頂部"><img src="/img/scrollup.png"/></a>
+	</div>
+	<script src="/js/totop.js"></script>
+
+<!-- Totop End -->
+
+<!-- MathJax Begin -->
+<!-- mathjax config similar to math.stackexchange -->
+
+
+<!-- MathJax End -->
+
+<!-- Tiny_search Begin -->
+
+<!-- Tiny_search End -->
+
+  </body>
+</html>
